@@ -2,6 +2,8 @@
 *.xml
 *.sql
 *.png
+*.7z
 
-./cse/src/__pycache__/
-./cse/src/.ipynb_checkpoints/
+cse/data/
+cse/src/__pycache__/
+cse/src/.ipynb_checkpoints/
