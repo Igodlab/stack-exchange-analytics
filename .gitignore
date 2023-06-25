@@ -1,0 +1,7 @@
+*.csv
+*.xml
+*.sql
+*.png
+
+./cse/src/__pycache__/
+./cse/src/.ipynb_checkpoints/
