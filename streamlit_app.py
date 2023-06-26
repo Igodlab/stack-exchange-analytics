@@ -31,7 +31,7 @@ def load_data(nameList):
         assert(len(nameList) >= 1), "List must not be empy"
         for n in nameList:
             csv_name = ""
-            all_df[n] = load_csv("csv-out-"+n, fpath=os.path.join("..", "data", n))
+            all_df[n] = load_csv("csv-out-"+n, fpath=os.path.join("cse", "data", n))
             postsCsv[n] = questionsAnalytics(all_df[n]["Posts"], freq=timedelta(days=7))
 
     elif type(nameList) is str:
