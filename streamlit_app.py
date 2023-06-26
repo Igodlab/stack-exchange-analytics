@@ -35,13 +35,13 @@ def load_data(nameList):
             postsCsv[n] = questionsAnalytics(all_df[n]["Posts"], freq=timedelta(days=7))
 
     elif type(nameList) is str:
-        all_df[nameList] = load_csv("csv-out-"+nameList, fpath=os.path.join("..", "data", nameList))
+        all_df[nameList] = load_csv("csv-out-"+nameList, fpath=os.path.join("cse", "data", nameList))
         postsCsv[nameList] = questionsAnalytics(all_df[nameList]["Posts"], freq=timedelta(days=7))
 
     return all_df, postsCsv
 
 data_load_state = st.progress(0, text="Loading data...")
-all_df, postsCsv = load_data("ada")
+all_df, postsCsv = load_data(["ada", "eth", "sol"])
 data_load_state = st.text("Done! (using cache)")
 
 # grab initial and final date
