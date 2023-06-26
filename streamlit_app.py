@@ -23,29 +23,25 @@ import os
 # data_path = "./cse/data"
 
 @st.cache_data
-def load_data():
-    # load data
-    ada = load_csv("csv-out-ada", fpath=os.path.join("cse", "data", "cardano"))
-    eth = load_csv("csv-out-eth", fpath=os.path.join("cse", "data", "ethereum"))
-    dot = load_csv("csv-out-dot", fpath=os.path.join("cse", "data", "substrate"))
-    sol = load_csv("csv-out-sol", fpath=os.path.join("cse", "data", "solana"))
-
-
-    # all dfs
-    all_df = {"ada": ada, \
-              "eth": eth, \
-              "dot": dot, \
-              "sol": sol}
-
+def load_data(nameList):
+    assert nameList != None, "Please give at least one *.csv file name to be loaded"
+    all_df = {}
     postsCsv = {}
+    if type(nameList) is list:
+        assert(len(nameList) >= 1), "List must not be empy"
+        for n in nameList:
+            csv_name = ""
+            all_df[n] = load_csv("csv-out-"+n, fpath=os.path.join("cse", "data", n))
+            postsCsv[n] = questionsAnalytics(all_df[n]["Posts"], freq=timedelta(days=7))
 
-    for kk in all_df.keys():
-        postsCsv[kk] = questionsAnalytics(all_df[kk]["Posts"], freq=timedelta(days=7))
+    elif type(nameList) is str:
+        all_df[nameList] = load_csv("csv-out-"+nameList, fpath=os.path.join("cse", "data", nameList))
+        postsCsv[nameList] = questionsAnalytics(all_df[nameList]["Posts"], freq=timedelta(days=7))
 
     return all_df, postsCsv
 
-data_load_state = st.text("Loading data...")
-all_df, postsCsv = load_data()
+data_load_state = st.progress(0, text="Loading data...")
+all_df, postsCsv = load_data(["ada", "eth", "sol"])
 data_load_state = st.text("Done! (using cache)")
 
 # grab initial and final date
