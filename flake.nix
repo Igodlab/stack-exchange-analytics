@@ -1,7 +1,7 @@
 {
-  description = "Starting to try good Ops procedures w/ Nix"
+  description = "Starting to try good Ops procedures w/ Nix";
 
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-23.05";
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-22.05";
 
   outputs = { self, nixpkgs }:
   let 
