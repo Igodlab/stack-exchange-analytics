@@ -17,7 +17,7 @@
           git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/ (\1$(parse_git_dirty))/"
         }
 
-        export PS1="\[\033[1;32m\]\W\[\033[33m\]\$(parse_git_branch)\[\033[00m\]$ "
+        export PS1="\[\033[1;32m\]\W\[\033[1;32m\]\$(parse_git_branch)$\[\033[00m\] "
       '';
 
       # pythonPackages = pkgs.python311Packages;
