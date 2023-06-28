@@ -33,21 +33,6 @@ tf = postsCsv["ada"]["Date"].iloc[-2]
 # dashboard title
 st.title("CSE metrics")
 
-# define color tags
-lineColor = {"ada": "deepskyblue",
-             "eth": "purple",
-             "dot": "pink",
-             "sol": "black"}
-
-ticker = {"ada": "ADA",
-          "eth": "ETH",
-          "dot": "DOT",
-          "sol": "SOL"}
-
-chainName = {"ada": "Cardano",
-             "eth": "Ethereum",
-             "dot": "Polkadot",
-             "sol": "Solana"}
 
 # # # Most popular tags figure 
 # st.subheader("Most discussed tags - bars")
