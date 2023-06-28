@@ -8,15 +8,9 @@ import plotly.express as px
 
 from datetime import datetime, timedelta
 
-import os
+import streamlit as st
 
-def convert_datetime(strdate, now=False):
-    if now == True:
-        return datetime.now()
-    elif ':' in strdate:
-        return datetime.strptime(strdate, "%Y-%m-%d %H:%M:%S")
-    else:
-        return datetime.strptime(strdate+" 00:00:00", "%Y-%m-%d %H:%M:%S")
+import os
 
 
 # create pandas data frame
@@ -67,8 +61,16 @@ def answer_ratio(df_Post):
     return ans_ratio
 
 # ------------------------------------------------------------------
-# CSE Data Dump
+# Manipulate Datetime 
 # ------------------------------------------------------------------
+
+def convert_datetime(strdate, now=False):
+    if now == True:
+        return datetime.now()
+    elif ':' in strdate:
+        return datetime.strptime(strdate, "%Y-%m-%d %H:%M:%S")
+    else:
+        return datetime.strptime(strdate+" 00:00:00", "%Y-%m-%d %H:%M:%S")
 
 # convert to datetime 
 def to_datetime(X):
@@ -80,7 +82,34 @@ def to_datetime(X):
 
     return X
 
+# truncate from / to date
+def dateRange(X, fromDate=None, toDate=None, dt=timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)):
+    kk = X.keys()
+    date_column_in_table = ["Date", "CreationDate", "CreationDate", "CreationDate", "CreationDate", np.nan, "LastAccessDate", "CreationDate"]
+    dateCol_list = [i for i in kk if i in date_column_in_table]
+    assert len(dateCol_list) >= 1, "Table must have a date column."
+    dateCol = dateCol_list[0]
+    tables = ["Badges", "Comments", "PostHistory", "PostLinks", "Posts", "Tags", "Users", "Votes"]
+    #dateRef = dict(zip(tables, date_column_in_table))
 
+    if (fromDate != None) & (toDate != None):
+        fromDateDT = pd.to_datetime(fromDate)
+        toDateDT = pd.to_datetime(toDate)
+        df = X[(X[dateCol] >= fromDateDT + dt) & (X[dateCol] <= toDateDT + dt + timedelta(days=1))]
+    elif (fromDate == None) & (toDate != None):
+        toDateDT = pd.to_datetime(toDate)
+        df = X[X[dateCol] <= toDateDT + timedelta(days=1) + dt]
+    elif (fromDate != None) & (toDate == None):
+        fromDateDT = pd.to_datetime(fromDate)
+        df = X[(X[dateCol] >= fromDateDT) & (X[dateCol] <= fromDateDT + dt + timedelta(days=1))]
+    else:
+        df = X.copy()
+
+    return df
+
+# ------------------------------------------------------------------
+# Load data functions 
+# ------------------------------------------------------------------
 # load xml
 def load_xml(fname, fpath=os.path.join("..", "data"), tables=["Badges", "Comments", "PostHistory", "PostLinks", "Posts", "Tags", "Users", "Votes"], convertToDatetime=True):
     r"""
@@ -146,31 +175,27 @@ def load_csv(fname, fpath=os.path.join("..", "data"), tables=["Badges", "Comment
 
     return data
 
+# This is the master function that joys from cache
+@st.cache_data
+def load_data(nameList):
+    assert nameList != None, "Please give at least one *.csv file name to be loaded"
+    all_df = {}
+    postsCsv = {}
+    if type(nameList) is list:
+        assert(len(nameList) >= 1), "List must not be empy"
+        for n in nameList:
+            csv_name = ""
+            all_df[n] = load_csv("csv-out-"+n, fpath=os.path.join("cse", "data", n))
+            postsCsv[n] = questionsAnalytics(all_df[n]["Posts"], freq=timedelta(days=7))
+
+    elif type(nameList) is str:
+        all_df[nameList] = load_csv("csv-out-"+nameList, fpath=os.path.join("cse", "data", nameList))
+        postsCsv[nameList] = questionsAnalytics(all_df[nameList]["Posts"], freq=timedelta(days=7))
+
+    return all_df, postsCsv
+
+
     
-# truncate from / to date
-def dateRange(X, fromDate=None, toDate=None, dt=timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)):
-    kk = X.keys()
-    date_column_in_table = ["Date", "CreationDate", "CreationDate", "CreationDate", "CreationDate", np.nan, "LastAccessDate", "CreationDate"]
-    dateCol_list = [i for i in kk if i in date_column_in_table]
-    assert len(dateCol_list) >= 1, "Table must have a date column."
-    dateCol = dateCol_list[0]
-    tables = ["Badges", "Comments", "PostHistory", "PostLinks", "Posts", "Tags", "Users", "Votes"]
-    #dateRef = dict(zip(tables, date_column_in_table))
-
-    if (fromDate != None) & (toDate != None):
-        fromDateDT = pd.to_datetime(fromDate)
-        toDateDT = pd.to_datetime(toDate)
-        df = X[(X[dateCol] >= fromDateDT + dt) & (X[dateCol] <= toDateDT + dt + timedelta(days=1))]
-    elif (fromDate == None) & (toDate != None):
-        toDateDT = pd.to_datetime(toDate)
-        df = X[X[dateCol] <= toDateDT + timedelta(days=1) + dt]
-    elif (fromDate != None) & (toDate == None):
-        fromDateDT = pd.to_datetime(fromDate)
-        df = X[(X[dateCol] >= fromDateDT) & (X[dateCol] <= fromDateDT + dt + timedelta(days=1))]
-    else:
-        df = X.copy()
-
-    return df
 
 # Posts.csv
 
@@ -287,6 +312,10 @@ def unique_tags(x, return_counts=True):
         return np.unique(xConcat, return_counts=True)
     else:
         return xConcat
+
+# ------------------------------------------------------------------
+# Plots 
+# ------------------------------------------------------------------
 
 # barplot for tags in `Posts.csv`
 def postsTagsBarplot(data, startDate, endDate, col="Posts", nTags=None):

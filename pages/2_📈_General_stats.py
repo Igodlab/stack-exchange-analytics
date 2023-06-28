@@ -1,55 +1,20 @@
-import numpy as np
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
-
+# stack exchange stats go here
 import plotly.express as px
-import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+import streamlit as st
 
 from cse.src.data_utils import *
 
-import os
 
-#############################################################
-# 
-#    streamlit_app.py
-#
-#############################################################
-
-
-
-# data path
-# data_path = "./cse/data"
-
-@st.cache_data
-def load_data(nameList):
-    assert nameList != None, "Please give at least one *.csv file name to be loaded"
-    all_df = {}
-    postsCsv = {}
-    if type(nameList) is list:
-        assert(len(nameList) >= 1), "List must not be empy"
-        for n in nameList:
-            csv_name = ""
-            all_df[n] = load_csv("csv-out-"+n, fpath=os.path.join("cse", "data", n))
-            postsCsv[n] = questionsAnalytics(all_df[n]["Posts"], freq=timedelta(days=7))
-
-    elif type(nameList) is str:
-        all_df[nameList] = load_csv("csv-out-"+nameList, fpath=os.path.join("cse", "data", nameList))
-        postsCsv[nameList] = questionsAnalytics(all_df[nameList]["Posts"], freq=timedelta(days=7))
-
-    return all_df, postsCsv
-
-data_load_state = st.progress(0, text="Loading data...")
+# read data
+data_load_state = st.progress(0, text="Reading data from cache...")
 all_df, postsCsv = load_data(["ada", "eth", "sol"])
 data_load_state = st.text("Done! (using cache)")
 
 # grab initial and final date
 t0 = postsCsv["ada"]["Date"].iloc[0]
 tf = postsCsv["ada"]["Date"].iloc[-2]
-
-# dashboard title
-st.title("CSE metrics")
 
 # define color tags
 lineColor = {"ada": "deepskyblue",
@@ -66,17 +31,6 @@ chainName = {"ada": "Cardano",
              "eth": "Ethereum",
              "dot": "Polkadot",
              "sol": "Solana"}
-
-# Most popular tags figure 
-st.subheader("Most discussed tags - bars")
-(fig01, fig02) = postsTagsBarplot(all_df["ada"], startDate="2021-05", endDate="2022-06", nTags=10)
-st.plotly_chart(fig02, use_container_width=True)
-
-
-# Same as above as a pie-chart
-st.subheader("Most discussed tags - piechart")
-fig03 = postsTagsPieplot(all_df["ada"], startDate="2021-05", endDate="2022-06", nTags=12)
-st.plotly_chart(fig03, use_container_width=True)
 
 # for CSE cardano moderators
 fig04 = make_subplots(rows=2, cols=1, 
@@ -132,3 +86,4 @@ st.plotly_chart(fig04, use_container_width=False)
 #               )
 
 # fig04.write_image("../images/cse-ecosystem-comparisson.png") 
+
