@@ -20,21 +20,28 @@
         export PS1="\[\033[1;32m\]\W\[\033[1;32m\]\$(parse_git_branch)$\[\033[00m\] "
       '';
 
-      # pyPkgs = pythonPackages: with pythonPackages; [
-      pyPkgs = pkgs.python311.withPackages ( ps: [
-        ps.pandas
-        ps.matplotlib
-        ps.numpy
-        ps.plotly
-        ps.seaborn
-      ]);
+      pythonPackages = pkgs.python311Packages;
+      pyPkgs = pythonPackages: with pythonPackages; [
+        pandas
+        matplotlib
+        numpy
+        plotly
+        seaborn
+      ];
+      # pyPkgs = pkgs.python311.withPackages ( ps: [
+      #   ps.pandas
+      #   ps.matplotlib
+      #   ps.numpy
+      #   ps.plotly
+      #   ps.seaborn
+      # ]);
     in
     {
       devShells.x86_64-linux = {
         default = pkgs.mkShell {
           buildInputs = [ 
-            # (pkgs.python3.withPackages pyPkgs)
-            pyPkgs
+            (pkgs.python3.withPackages pyPkgs)
+            # pyPkgs
             pkgs.streamlit 
             pkgs.cowsay 
           ];
